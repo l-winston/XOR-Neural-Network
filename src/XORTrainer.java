@@ -17,14 +17,16 @@ public class XORTrainer {
 	public static void main(String[] args) throws FileNotFoundException{
 		initFrame();
 
-		Net net = new Net();
+		Net net = new Net(new int[]{2,2, 4, 1});
 		net.randomize();
 
 		Point lastCoord = new Point(0, image.getHeight());
+		
+		
 
-		int[] neuron1test = { 1, 1, 0, 0 };
-		int[] neuron2test = { 1, 0, 1, 0 };
-		int[] label = { 0, 1, 1, 0 };
+		int[] XORTest1 = { 1, 1, 0, 0 };
+		int[] XORTest2 = { 1, 0, 1, 0 };
+		int[] XORLabel = { 0, 1, 1, 0 };
 
 		// float[] prev = new float[4];
 
@@ -32,28 +34,19 @@ public class XORTrainer {
 		int totalCorrect = 0;
 		while (true) {
 
-			int numberCorrect = 0;
 			cycle++;
-			for (int i = 0; i < label.length; i++) {
-				net.in[0] = neuron1test[i];
-				net.in[1] = neuron2test[i];
-
+			for (int i = 0; i < XORLabel.length; i++) {
+				net.layers.get(0)[0] = XORTest1[i];
+				net.layers.get(0)[1] = XORTest2[i];
+				
 				net.propagate();
-
-				if ((net.out[0] > 0.5 && label[i] == 1) || (net.out[0] <= 0.5 && label[i] == 0)) {
-					numberCorrect++;
+				net.backprop(XORLabel[i]);
+				double out = net.layers.get(net.layers.size()-1)[0];
+				if ((out > 0.5 && XORLabel[i] == 1) || (out <= 0.5 && XORLabel[i] == 0)) {
 					totalCorrect++;
 				}
 
-				// if(Math.abs(out[0]-label[i]) < 0.05){
-				// numberCorrect++;
-				// totalCorrect++;
-				// }
-
-				net.backprop(label[i]);
 			}
-
-			numberCorrect /= label.length;
 
 			int interval = 10;
 
@@ -63,14 +56,14 @@ public class XORTrainer {
 					break;
 				}
 				int y = (int) (image.getHeight()
-						- Math.round(totalCorrect * 1.0 / cycle / label.length * image.getHeight()));
+						- Math.round(totalCorrect * 1.0 / cycle	/ XORLabel.length * image.getHeight()));
 
 				g2d.drawLine(lastCoord.x, lastCoord.y, x, y);
 				frame.repaint();
 				lastCoord = new Point(x, y);
 			}
 
-			//System.out.println(totalCorrect * 1.0 / cycle / label.length);
+			System.out.println(totalCorrect + " " + cycle + " " + totalCorrect * 1.0 / cycle /4);
 		}
 
 		net.exportNet("net.out");
